@@ -1,0 +1,139 @@
+# Import os for screen clearing and file path checks
+import os
+
+# Import CSV  file for reading and writing inventory data
+import csv
+
+# Import utilities from stationery_utils module
+from stationery_utils import StationeryItem, calculate_item_total, generate_ai_insights
+
+# Name of CSV file
+CSV_FILE = "stationery_inventory.csv"
+
+# Default inventory used when csv file does not exist yet
+inventory = {
+    "Pen": StationeryItem("Pen", 200, 1.20),
+    "Pencil": StationeryItem("Pencil", 250, 0.80),
+    "Eraser": StationeryItem("Eraser", 150, 0.50),
+    "Glue Stick": StationeryItem("Glue Stick", 100, 1.10),
+    "Writing Book": StationeryItem("Writing Book", 300, 1.50)
+}
+
+# Clear the screen for better readability
+def clear_screen():
+    '''Clears the console output framework cleanly.'''
+    os.system('cls' if os.name =='nt' else 'clear')
+
+# Display menu options to the user
+def display_menu():
+    print("=" * 55)
+    print("        STATIONERY INVENTORY MANAGEMENT SYSTEM      ")
+    print("=" * 55)
+    print("1 - To enter new stationery item")
+    print("2 - To edit the stationery item")
+    print("3 - To update the stationery item which was sold")
+    print("4 - To display all the stationery items")
+    print("5 - To save the list of all the staionary items .CSV file")
+    print("=" * 55)
+
+# Main application loop    
+def main():
+    while True:
+        clear_screen()
+        display_menu()
+        choice = input("Select an option (1-5): ").strip()
+        
+        # Add a new stationery item
+        if choice == '1':
+            print("\n--- ENTER NEW STATIONERY ITEM ---")
+            name = input("Enter Item Name: ").strip().title()
+
+            if name in inventory:
+                print(f"Error: '{name}' already exists. Use Option 2 to edit.")
+            else:
+                try:
+                    quantity = int(input("Enter Quantity: "))
+                    price = float(input("Enter Unit Price ($): "))
+
+                    if quantity < 0 or price < 0:
+                        print("Error: Quantity and Price cannot be negative.")
+                    else:
+                        inventory[name] = StationeryItem(name,quantity, price)
+                        print(f" '{name}' added successfully!")
+                except ValueError:
+                    print("Error: Please enter valid numbers only.")
+                    
+        # Edit an existing item quantity and price
+        elif choice == '2':
+            print("\n--- EDIT STATIONERY ITEM ---")
+            name = input("Enter Item Name to edit: ").strip().title()
+            if name in inventory:
+                try:
+                    quantity = int(input("Enter new Quantity: "))
+                    price = float(input("Enter new unit price ($): "))
+                    if quantity < 0 or price < 0:
+                        print("Error: Values cannot be negative.")
+                    else:
+                        inventory[name] = StationeryItem(name, quantity, price)
+                        print(f" '{name}' updated successfully!")
+                except ValueError:
+                    print("Error: Invalid number layout entries.")
+            else:
+                print("Error: Item not found in database records.")
+                
+        # Update inventory when an item is sold
+        elif choice == '3':
+            print("\n--- UPDATE STATIONERY ITEM SOLD ---")
+            name = input("Enter Item Name sold: ").strip().title()
+            if name in inventory:
+                try:
+                    sold_qty = int(input(f"Enter quantity sold "))
+                    if sold_qty < 0:
+                        print("Error: Values cannot be negative.")
+                    elif sold_qty > inventory[name].quantity:
+                        print("Error: Quantity sold exeeds current stock.")
+                    else:
+                        inventory[name].quantity = sold_qty
+                        print(f" '{name}' updated successfully!")
+                except ValueError:
+                    print("Error: Invalid number layout entries.")
+            else:
+                print("Error: Item not found in database records.")
+                
+        # Display all stationery items in inventory list
+        elif choice == '4':
+            print("\n--- DISPLAY ALL STATIONERY ITEMS ---")
+            print(f"{'Name':<18} | {'Quantity':<10} | {'Price ($)':<10} | {'Total Price ($)':<12} ")
+            print("-" * 60)
+            for name, item in inventory.items():
+                total_price = calculate_item_total(item.quantity, item.price)
+                print(f"{item.name:<18} | {item.quantity:<10} | {item.price:<10.2f} | {total_price:<12.2f}")
+            print("=" * 60)
+            
+        # Save current items into CSV file
+        elif choice == '5':
+            print("\n--- SAVE TO CSV FILE ---")
+            try:
+                with open ("stationery_inventory.csv", mode="w", newline="") as file:
+                    writer = csv.writer(file)
+                    writer.writerow(["Name", "Quantity", "Price", "Total Price"])
+                    for name, item in inventory.items():
+                        total_price = calculate_item_total(item.quantity, item.price)
+                        writer.writerow([item.name, item.quantity, item.price, total_price])
+                print("Inventory successfully saved to CSV file!")
+            except Exception:
+                print("Error: System could not write to CSV file.")
+
+        else:
+            print("Error: Invalid option selection. Please choose a number between 1 and 5.")
+
+        print("\n" + "=" * 55)
+        cont = input("Do you want to continue with the program? (Y/N): ").strip().upper()
+        if cont != 'Y':
+            print("\nThank you for using Stationery Inventory Management System. Goodbye!")
+            break
+            
+# Run main only when the file is excuted directly
+if __name__ == "__main__":
+    main()
+    

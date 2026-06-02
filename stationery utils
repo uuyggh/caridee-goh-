@@ -1,0 +1,65 @@
+# Define a stationery inventory item
+class StationeryItem:
+    def __init__(self, name: str, quantity: int, price: float):
+    # Initialize basic attributes
+        self.name = name 
+        self.quantity = quantity
+        self.price = price
+    # Calculate total value immediately upon object creation
+        self.total_price = self.calculate_total()
+        
+    # Rounding to 2 decimal places to handle floating-point precision issues
+    def calculate_total(self) -> float:
+        '''Calculates total price based on current quantity and unit price.'''
+        return round(self.quantity * self.price, 2)
+        
+    # Update item quantity when stock changes, and recalculate total price
+    def update_quantity(self, new_qty: int):
+        self.quantity = new_qty
+        self.total_price = self.calculate_total()
+
+    # Display items in dictionary
+    def to_dict(self):
+        return {
+            "Name": self.name,
+            "Quantity": self.quantity,
+            "Price ($)": f"{self.price:.2f}", # Formats float to string with 2 decimals
+            "Total Price ($)": f"{self.total_price:.2f}"
+        }
+        
+# This is a serparate helper function to calculate total price and return the value to the main script
+def calculate_item_total(quantity: int, price: float) -> float:
+    '''Helper function to calculate total value returned to main script.'''
+    return round(quantity * price, 2)
+
+# Creates AI insights based on the current list
+def generate_ai_insights(inventory_list: list) -> str:
+    '''
+    Simulates a Generative AI call (e.g., OpenAI API or Google Gemini)
+    to provide smart stock management insights based on the current list.
+    '''
+# Check if inventory list is empty
+    if not inventory_list: 
+        return "AI Insight: Inventory is empty. No data to analyze."
+        
+# Adding up the total value of all items in the inventory 
+    total_items = len(inventory_list)
+    total_stock_value = sum(item.total_price for item in inventory_list)
+
+# Filter list for items below the threshold of 150 units
+    low_stock = [item.name for item in inventory_list if item.quantity < 150]
+
+# Find the object with the highest 'total_price' attribute
+    highest_value_item = max(inventory_list, key=lambda x: x.total_price)
+    
+# Constructing the formatted report string
+    ai_analysis = (
+        f"\n=== [Generative AI Automated Insight Report] ===\n"
+        f"- Status: Currently managing {total_items} unique product lines.\n"
+        f"- Financial Portfolio: Total working capital tied in inventory is ${total_stock_value:,.2f}.\n"
+        f"- Action Item: Low stock detected for items {low_stock}. Recommend restocking soon.\n"
+        f"- Strategic Focus: '{highest_value_item.name}' represents your highest asset concentration "
+        f"(${highest_value_item.total_price:.2f}). Monitor price shifts closely."
+
+    )
+    return ai_analysis
